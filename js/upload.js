@@ -1,5 +1,7 @@
 $(document).ready(() => {
 
+    const loadingEmojis = ['😴', '🥱', '😯',  '🤨', '🤔', '🙄', '🙂', '😏', '😀', '😎'];
+
     function uuidv4() {
         return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
                 const r = Math.random() * 16 | 0,
@@ -173,7 +175,7 @@ $(document).ready(() => {
             `${ + percent
             }%`
         );
-        $(`${progress_bar_id} .status`).text(`${percent}%`);
+        $(`${progress_bar_id} .status`).text(`${percent}% ${loadingEmojis[Math.round(percent / (loadingEmojis.length + 1))]}`);
     };
 
     $("#upload").on("click", (e) => {
