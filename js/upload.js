@@ -1,31 +1,54 @@
-function uuidv4() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-        var r = Math.random() * 16 | 0,
-            v = c == 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
-    });
-}
-
-function copyToClipboard (text) {
-    if (navigator.clipboard) { // default: modern asynchronous API
-      return navigator.clipboard.writeText(text);
-    } else if (window.clipboardData && window.clipboardData.setData) {     // for IE11
-      window.clipboardData.setData('Text', text);
-      return Promise.resolve();
-    } else {
-      // workaround: create dummy input
-      const input = h('input', { type: 'text' });
-      input.value = text;
-      document.body.append(input);
-      input.focus();
-      input.select();
-      document.execCommand('copy');
-      input.remove();
-      return Promise.resolve();
-    }
-  }
-
 $(document).ready(() => {
+
+    function uuidv4() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+                const r = Math.random() * 16 | 0,
+                    v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+    }
+
+    function copyToClipboard(text) {
+        if (navigator.clipboard) { // default: modern asynchronous API
+            return navigator.clipboard.writeText(text);
+        } else if (window.clipboardData && window.clipboardData.setData) { // for IE11
+            window.clipboardData.setData('Text', text);
+            return Promise.resolve();
+        } else { // workaround: create dummy input
+            const input = h('input', {type: 'text'});
+            input.value = text;
+            document.body.append(input);
+            input.focus();
+            input.select();
+            document.execCommand('copy');
+            input.remove();
+            return Promise.resolve();
+        }
+    }
+
+    const paste = async () => {
+        try {
+            const clipboardItems = await navigator.clipboard.read();
+            for (const clipboardItem of clipboardItems) {
+                for (const type of clipboardItem.types) {
+                    if (type !== "text/html") {
+                    const blob = await clipboardItem.getType(type);
+                    console.log(type);
+                    const upload = new Upload(blob);
+                    // maby check size or type here with upload.getSize() and upload.getType()
+                    // execute upload
+                    upload.doUpload();
+                    }
+                }
+            }
+        } catch (err) {
+            console.error(err.name, err.message);
+        }
+    };
+    document.onpaste = () => {
+        paste();
+    };
+
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
     const redirect_uri = "http://localhost:5500/upload.html"; // replace with your redirect_uri;
@@ -78,12 +101,14 @@ $(document).ready(() => {
         var that = this;
         var formData = new FormData();
 
+        const filename = this.getName() || "untitled.png";
         // add assoc key values, this will be posts values
-        formData.append("file", this.file, this.getName());
+        formData.append("file", this.file, filename);
         formData.append("upload_file", true);
 
+        console.log(filename);
         const folderId = '1lJ5qK652a9GOBOMtxOmpNHDyF5wQ1THG';
-        const extension = this.getName().split(".")[this.getName().split(".").length - 1];
+        const extension = filename.split(".")[filename.split(".").length - 1] || 'png';
         const fileMetadata = {
             'name': `${
                 uuidv4()
@@ -119,7 +144,7 @@ $(document).ready(() => {
                 }`;
                 document.querySelector("#result").innerHTML = url;
                 copyToClipboard(url);
-                 
+
 
             },
             error: (error) => {
