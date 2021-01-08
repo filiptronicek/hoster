@@ -2,7 +2,7 @@ $(document).ready(() => {
 
     const clientId = "827930320434-jun1dkcvitm47195pda9mmt4kn24ck4n.apps.googleusercontent.com";
     // redirect_uri of the project
-    const redirect_uri = "http://localhost:5500/upload.html";
+    const redirect_uri = "https://img.fufu.wtf";
     // scope of the project
     const scope = "https://www.googleapis.com/auth/drive";
     // the url to which the user is redirected to
